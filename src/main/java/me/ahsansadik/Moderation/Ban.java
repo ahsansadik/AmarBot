@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import java.awt.*;
 import java.time.Duration;
@@ -20,15 +21,16 @@ import java.util.Collections;
 public class Ban extends ListenerAdapter {
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        Guild guild = event.getJDA().getGuildById(1332267587152773142L);
-        if (guild != null) {  // Ensure guild is not null
-            guild.upsertCommand("ban", "Ban a user")
-                    .addOptions(new OptionData(OptionType.USER, "user", "User to ban", true))
-                    .addOptions(new OptionData(OptionType.INTEGER, "duration", "Duration of ban in days (0 for permanent)", true))
-                    .addOptions(new OptionData(OptionType.STRING, "reason", "Reason for ban", false))
-                    .queue();
-        }
+        event.getJDA().updateCommands()
+                .addCommands(
+                        Commands.slash("ban", "Ban a user")
+                                .addOptions(new OptionData(OptionType.USER, "user", "User to ban", true))
+                                .addOptions(new OptionData(OptionType.INTEGER, "duration", "Duration of ban in days (0 for permanent)", true))
+                                .addOptions(new OptionData(OptionType.STRING, "reason", "Reason for ban", false))
+                )
+                .queue();
     }
+
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {

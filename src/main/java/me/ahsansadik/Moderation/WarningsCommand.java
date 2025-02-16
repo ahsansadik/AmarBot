@@ -6,11 +6,10 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import java.util.List;
 import java.util.Map;
@@ -19,12 +18,12 @@ public class WarningsCommand extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        Guild guild = event.getJDA().getGuildById(1332267587152773142L);
-        if (guild != null) {
-            guild.upsertCommand("warnings", "Display warnings of a user")
-                    .addOptions(new OptionData(OptionType.USER, "user", "The user whose warnings you want to see", true))
-                    .queue();
-        }
+        event.getJDA().updateCommands()
+                .addCommands(
+                        Commands.slash("warnings", "Display warnings of a user")
+                                .addOptions(new OptionData(OptionType.USER, "user", "The user whose warnings you want to see", true))
+                )
+                .queue();
     }
 
 

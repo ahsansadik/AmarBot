@@ -9,15 +9,19 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 public class Kick extends ListenerAdapter {
 
-        @Override
-        public void onReady(@NotNull ReadyEvent event) {
-            Guild guild = event.getJDA().getGuildById(1332267587152773142L);
-            guild.upsertCommand("kick", "Kick a user")
-                    .addOptions(new OptionData(OptionType.USER,"kick", "kick a user", true)).queue();
-        }
+    @Override
+    public void onReady(@NotNull ReadyEvent event) {
+        event.getJDA().updateCommands()
+                .addCommands(
+                        Commands.slash("kick", "Kick a user")
+                                .addOptions(new OptionData(OptionType.USER, "kick", "kick a user", true))
+                )
+                .queue();
+    }
 
         @Override
         public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {

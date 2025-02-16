@@ -7,7 +7,11 @@ import net.dv8tion.jda.api.entities.Guild.Ban;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+
 
 import java.awt.*;
 import java.util.List;
@@ -17,10 +21,11 @@ public class BanList extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        Guild guild = event.getJDA().getGuildById(1332267587152773142L);
-        if (guild != null) {
-            guild.upsertCommand("banlist", "Shows a list of banned users").queue();
-        }
+        event.getJDA().updateCommands()
+                .addCommands(
+                        Commands.slash("banlist", "Shows a list of banned users")
+                )
+                .queue();
     }
 
     @Override

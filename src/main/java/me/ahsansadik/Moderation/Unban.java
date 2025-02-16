@@ -12,18 +12,20 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import java.awt.*;
 
 public class Unban extends ListenerAdapter {
+
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        Guild guild = event.getJDA().getGuildById(1332267587152773142L);
-        if (guild != null) {
-            guild.upsertCommand("unban", "Unban a user")
-                    .addOptions(new OptionData(OptionType.STRING, "username", "Name of the user to unban", true)) // Use name instead of ID
-                    .queue();
-        }
+        event.getJDA().updateCommands()
+                .addCommands(
+                        Commands.slash("unban", "Unban a user")
+                                .addOptions(new OptionData(OptionType.STRING, "username", "Name of the user to unban", true))
+                )
+                .queue();
     }
 
     @Override
@@ -46,6 +48,7 @@ public class Unban extends ListenerAdapter {
                         if (bannedUser.getName().equalsIgnoreCase(username)) { // Match username
                             guild.unban(bannedUser).queue();
                             Role role = guild.getRoleById(1335887144060715039L);
+                            assert role != null;
                             guild.addRoleToMember(bannedUser, role).queue();
 
                             EmbedBuilder embed = new EmbedBuilder();

@@ -8,16 +8,18 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 public class Unmute extends ListenerAdapter {
+
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        Guild guild = event.getJDA().getGuildById(1332267587152773142L);
-        if(guild != null) {
-            guild.upsertCommand("unmute", "unmute a user")
-                    .addOptions(new OptionData(OptionType.USER, "unmute", "unmute a user", true))
-                    .queue();
-        }
+        event.getJDA().updateCommands()
+                .addCommands(
+                        Commands.slash("unmute", "unmute a user")
+                                .addOptions(new OptionData(OptionType.USER, "unmute", "unmute a user", true))
+                )
+                .queue();
     }
 
     @Override
