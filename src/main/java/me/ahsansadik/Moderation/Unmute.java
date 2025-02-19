@@ -13,16 +13,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 public class Unmute extends ListenerAdapter {
 
     @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("unmute", "unmute a user")
-                                .addOptions(new OptionData(OptionType.USER, "unmute", "unmute a user", true))
-                )
-                .queue();
-    }
-
-    @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if(event.getName().equals("unmute")){
             Guild guild = event.getGuild();

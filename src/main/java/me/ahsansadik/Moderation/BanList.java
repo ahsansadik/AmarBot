@@ -20,15 +20,6 @@ import java.util.concurrent.CompletableFuture;
 public class BanList extends ListenerAdapter {
 
     @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("banlist", "Shows a list of banned users")
-                )
-                .queue();
-    }
-
-    @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (!event.getName().equals("banlist")) return;
 

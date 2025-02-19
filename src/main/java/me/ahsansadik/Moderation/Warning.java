@@ -19,16 +19,6 @@ import java.util.Map;
 public class Warning extends ListenerAdapter {
     private static final Map<Long, List<String>> warnings = new HashMap<>();
 
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("warn", "Warn a user")
-                                .addOptions(new OptionData(OptionType.USER, "user", "The user to warn", true))
-                                .addOptions(new OptionData(OptionType.STRING, "reason", "Reason for warning", false))
-                )
-                .queue();
-    }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {

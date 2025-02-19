@@ -1,13 +1,13 @@
 package me.ahsansadik.Moderation;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -15,14 +15,6 @@ import java.util.Map;
 
 public class WelcomeText extends ListenerAdapter {
     private final Map<Long, Long> welcomeChannelMap = new HashMap<>();
-
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        Guild guild = event.getJDA().getGuildById(1332267587152773142L);
-        guild.upsertCommand("set_welcome_channel","Set the default channel for welcoming new members")
-                .queue();
-    }
-
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {

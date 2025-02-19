@@ -16,16 +16,6 @@ import java.util.Map;
 
 public class WarningsCommand extends ListenerAdapter {
 
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("warnings", "Display warnings of a user")
-                                .addOptions(new OptionData(OptionType.USER, "user", "The user whose warnings you want to see", true))
-                )
-                .queue();
-    }
-
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {

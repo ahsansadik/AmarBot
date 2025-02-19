@@ -18,15 +18,6 @@ import java.awt.*;
 
 public class Unban extends ListenerAdapter {
 
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("unban", "Unban a user")
-                                .addOptions(new OptionData(OptionType.STRING, "username", "Name of the user to unban", true))
-                )
-                .queue();
-    }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -39,34 +30,56 @@ public class Unban extends ListenerAdapter {
                 return;
             }
 
-            if (member.hasPermission(Permission.BAN_MEMBERS)) {
-                String username = event.getOption("username").getAsString().toLowerCase(); // Get username input
-
-                guild.retrieveBanList().queue(bans -> {
-                    for (Guild.Ban ban : bans) {
-                        User bannedUser = ban.getUser();
-                        if (bannedUser.getName().equalsIgnoreCase(username)) { // Match username
-                            guild.unban(bannedUser).queue();
-                            Role role = guild.getRoleById(1335887144060715039L);
-                            assert role != null;
-                            guild.addRoleToMember(bannedUser, role).queue();
-
-                            EmbedBuilder embed = new EmbedBuilder();
-                            embed.setTitle("User Unbanned");
-                            embed.setDescription("**User:** " + bannedUser.getAsMention() + " has been unbanned.");
-                            embed.setColor(Color.GREEN);
-                            event.replyEmbeds(embed.build()).queue();
-                            return;
-                        }
-                    }
-                    event.reply("No banned user found with that name.").setEphemeral(true).queue();
-                });
-            } else {
+            if (!member.hasPermission(Permission.BAN_MEMBERS)) {
                 event.reply("You do not have permission to unban members.").setEphemeral(true).queue();
+                return;
             }
+
+            String username = event.getOption("username").getAsString().toLowerCase();
+
+            // Defer reply to prevent timeout
+            event.deferReply().queue();
+
+            guild.retrieveBanList().queue(bans -> {
+                for (Guild.Ban ban : bans) {
+                    User bannedUser = ban.getUser();
+                    if (bannedUser.getName().equalsIgnoreCase(username)) {
+
+                        // Unban user and respond immediately
+                        guild.unban(bannedUser).queue(success -> {
+                            EmbedBuilder embed = new EmbedBuilder()
+                                    .setTitle("User Unbanned")
+                                    .setDescription("**User:** " + bannedUser.getAsMention() + " has been unbanned.")
+                                    .setColor(Color.GREEN);
+
+                            // Send the response before doing anything else
+                            event.getHook().editOriginalEmbeds(embed.build()).queue();
+
+                            // Optional: Add role back when the user rejoins
+                            guild.findMembers(m -> m.getId().equals(bannedUser.getId())).onSuccess(members -> {
+                                if (!members.isEmpty()) {
+                                    Role role = guild.getRoleById(1335887144060715039L);
+                                    if (role != null) {
+                                        guild.addRoleToMember(members.get(0), role).queue();
+                                    }
+                                }
+                            });
+
+                        }, error -> event.getHook().editOriginal("Failed to unban the user: " + error.getMessage()).queue());
+
+                        return;
+                    }
+                }
+
+                // If no user was found in the ban list
+                event.getHook().editOriginal("No banned user found with that name.").queue();
+            });
         }
     }
+
+
 }
+
 
 
 

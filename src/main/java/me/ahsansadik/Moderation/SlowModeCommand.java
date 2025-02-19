@@ -14,17 +14,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 public class SlowModeCommand extends ListenerAdapter {
 
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("slow_mode", "Sets slow mode for this channel")
-                                .addOptions(new OptionData(OptionType.INTEGER, "duration", "Slow mode duration in seconds (0-21600)", true))
-                )
-                .queue();
-    }
-
-    @Override
+       @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (!event.getName().equals("slow_mode")) return;
 

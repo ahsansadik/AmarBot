@@ -15,18 +15,7 @@ import java.util.List;
 
 public class ClearWarningsCommand extends ListenerAdapter {
 
-
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("clear_warnings", "Clears all warnings for a user")
-                                .addOptions(new OptionData(OptionType.USER, "user", "The user whose warnings you want to clear", true))
-                )
-                .queue();
-    }
-
-    @Override
+   @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (!event.getName().equals("clear_warnings")) return;
 

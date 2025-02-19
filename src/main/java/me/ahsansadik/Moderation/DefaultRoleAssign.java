@@ -14,16 +14,6 @@ public class DefaultRoleAssign extends ListenerAdapter {
     public Role defaultrole;
 
     @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        event.getJDA().updateCommands()
-                .addCommands(
-                        Commands.slash("default_role", "Set the default role for new members")
-                                .addOptions(new OptionData(OptionType.ROLE, "role", "Role to be added", true))
-                )
-                .queue();
-    }
-
-    @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getName().equals("default_role")) {
             defaultrole = event.getOption("role").getAsRole();
