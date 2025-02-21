@@ -1,0 +1,37 @@
+package me.ahsansadik.Moderation.SlashCommands;
+
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.EmbedBuilder;
+
+
+public class SlowModeCommand extends ListenerAdapter {
+
+       @Override
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        if (!event.getName().equals("slow_mode")) return;
+
+        int duration = event.getOption("duration").getAsInt();
+        TextChannel channel = event.getChannel().asTextChannel();
+
+        if (duration < 0 || duration > 21600) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setColor(0xFF0000)
+                    .setTitle("❌ Invalid Duration")
+                    .setDescription("Slow mode duration must be between **0 and 21600 seconds** (6 hours).")
+                    .build()
+            ).setEphemeral(true).queue();
+            return;
+        }
+
+        channel.getManager().setSlowmode(duration).queue();
+
+        event.replyEmbeds(new EmbedBuilder()
+                .setColor(0x00FFFF)
+                .setTitle("🕒 Slow Mode Updated")
+                .setDescription("Slow mode has been set to **" + duration + "** seconds in this channel.")
+                .build()
+        ).queue();
+    }
+}

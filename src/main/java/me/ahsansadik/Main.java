@@ -1,6 +1,12 @@
 package me.ahsansadik;
 
-import me.ahsansadik.Moderation.*;
+import me.ahsansadik.Moderation.Features.Announcement;
+import me.ahsansadik.Moderation.Features.BadWordFilter;
+import me.ahsansadik.Moderation.Features.LogChannel;
+import me.ahsansadik.Moderation.Features.WelcomeText;
+import me.ahsansadik.Moderation.Response.ChatGPT;
+import me.ahsansadik.Moderation.Response.OpenAIChat;
+import me.ahsansadik.Moderation.SlashCommands.*;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -12,8 +18,15 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import java.util.List;
 
 public class Main {
+
+    public static JDABuilder getJda() {
+        return jda;
+    }
+
+    private static JDABuilder jda;
+
     public static void main(String[] args) {
-        JDABuilder jda = JDABuilder.createDefault("TOKEN")
+        jda = JDABuilder.createDefault("TOKEn")
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
                 .addEventListeners(new DefaultRoleAssign())
                 .addEventListeners(new WelcomeText())
@@ -26,16 +39,19 @@ public class Main {
                 .addEventListeners(new WarningsCommand())
                 .addEventListeners(new ClearWarningsCommand())
                 .addEventListeners(new SlowModeCommand())
-                .addEventListeners(new Kick());
+                .addEventListeners(new Kick())
+                .addEventListeners(new BadWordFilter())
+                .addEventListeners(new Announcement())
+                .addEventListeners(new LogChannel());
+
 
         // Build JDA instance
+
         try {
             jda.build().awaitReady().getGuilds().forEach(Main::registerCommands);
         } catch (InterruptedException e) {
-            System.err.println("Bot startup was interrupted: " + e.getMessage());
-            Thread.currentThread().interrupt();
+            e.printStackTrace();
         }
-
     }
 
     private static void registerCommands(Guild guild) {
@@ -73,6 +89,14 @@ public class Main {
                         .addOptions(new OptionData(OptionType.ROLE, "role", "Role to be added", true)),
 
                 Commands.slash("set_welcome_channel", "Set the default channel for welcoming new members"),
+
+                Commands.slash("set_log_channel", "Set the log channel for logging any events in the guild"),
+
+                Commands.slash("announcement", "Create a server announcement"),
+
+                /* Commands.slash("chatgpt", "Send ChatGPT Prompts")
+                        .addOptions(new OptionData(OptionType.STRING, "prompt", "Send a prompt", true)),
+                */
 
                 Commands.slash("slow_mode", "Sets slow mode for this channel")
                         .addOptions(new OptionData(OptionType.INTEGER, "duration", "Slow mode duration in seconds (0-21600)", true))
