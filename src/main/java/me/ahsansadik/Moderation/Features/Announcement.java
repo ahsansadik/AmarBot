@@ -1,6 +1,7 @@
 package me.ahsansadik.Moderation.Features;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,14 +12,29 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Announcement extends ListenerAdapter {
 
-    private static final long ANNOUNCEMENT_CHANNEL_ID = 1342371751912275978L; // Update with your channel ID
+    private final Map<Long, Long> announcementChannelMap = new HashMap<>();
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getName().equals("announcement")) {
+        if (event.getName().equals("set_announcement_channel")) {
+            TextChannel channel = event.getChannel().asTextChannel();
+            if (channel != null) {
+                announcementChannelMap.put(event.getGuild().getIdLong(), channel.getIdLong());
+                event.reply("Announcement channel set successfully to " + channel.getAsMention()).queue();
+            } else {
+                event.reply("An unknown error occurred").queue();
+            }
+        } else if (event.getName().equals("announcement")) {
+            if (!announcementChannelMap.containsKey(event.getGuild().getIdLong())) {
+                event.reply("❌ No announcement channel has been set. Please use `/set_announcement_channel` first.").setEphemeral(true).queue();
+                return;
+
+            }
 
             TextInput title = TextInput.create("title-field", "Title", TextInputStyle.SHORT)
                     .setRequired(true)
@@ -26,7 +42,7 @@ public class Announcement extends ListenerAdapter {
                     .setMaxLength(100)
                     .build();
 
-            TextInput subhead = TextInput.create("subhead-field", "Subhead", TextInputStyle.SHORT) // FIXED ID
+            TextInput subhead = TextInput.create("subhead-field", "Subhead", TextInputStyle.SHORT)
                     .setRequired(true)
                     .setMinLength(1)
                     .build();
@@ -36,11 +52,17 @@ public class Announcement extends ListenerAdapter {
                     .setMinLength(1)
                     .build();
 
+            TextInput imageUrl = TextInput.create("image-url", "Image URL (Optional)", TextInputStyle.SHORT)
+                    .setRequired(false)
+                    .build();
+
             Modal modal = Modal.create("announcement_modal", "Create Announcement")
                     .addActionRow(title)
                     .addActionRow(subhead)
                     .addActionRow(body)
+                    .addActionRow(imageUrl)
                     .build();
+
             event.replyModal(modal).queue();
         }
     }
@@ -48,10 +70,25 @@ public class Announcement extends ListenerAdapter {
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         if (event.getModalId().equals("announcement_modal")) {
-            // ✅ Fixed: Using correct IDs
+            Long channelId = announcementChannelMap.get(event.getGuild().getIdLong());
+            if (channelId == null) {
+                event.reply("❌ No announcement channel has been set. Please use `/set_announcement_channel` first.").setEphemeral(true).queue();
+                return;
+            }
+
+            TextChannel channel = event.getJDA().getTextChannelById(channelId);
+            if (channel == null) {
+                event.reply("❌ The set announcement channel is no longer available. Please set a new one.").setEphemeral(true).queue();
+                return;
+            }
+
             ModalMapping titleMapping = event.getValue("title-field");
             ModalMapping subheadMapping = event.getValue("subhead-field");
             ModalMapping bodyMapping = event.getValue("main-body");
+
+            ModalMapping imageUrlMapping = event.getValue("image-url");
+            String imageUrl = (imageUrlMapping != null) ? imageUrlMapping.getAsString().trim() : "";
+
 
             String title = (titleMapping != null) ? titleMapping.getAsString() : "Untitled";
             String subhead = (subheadMapping != null) ? subheadMapping.getAsString() : "";
@@ -64,11 +101,14 @@ public class Announcement extends ListenerAdapter {
                     .setFooter("Posted by " + event.getUser().getName(), event.getUser().getAvatarUrl());
 
             if (!subhead.isEmpty()) {
-                embed.addField("Subhead", subhead, false);
+                embed.setDescription("**" + subhead + "**\n\n" + body);
             }
 
-            event.getJDA().getTextChannelById(ANNOUNCEMENT_CHANNEL_ID)
-                    .sendMessageEmbeds(embed.build())
+            if (!imageUrl.isEmpty()) {
+                embed.setImage(imageUrl);
+            }
+
+            channel.sendMessageEmbeds(embed.build())
                     .queue(
                             success -> event.reply("✅ Announcement posted successfully!").setEphemeral(true).queue(),
                             failure -> event.reply("❌ Failed to post the announcement. Please check permissions.").setEphemeral(true).queue()

@@ -1,12 +1,11 @@
 package me.ahsansadik;
 
-import me.ahsansadik.Moderation.Features.Announcement;
-import me.ahsansadik.Moderation.Features.BadWordFilter;
-import me.ahsansadik.Moderation.Features.LogChannel;
-import me.ahsansadik.Moderation.Features.WelcomeText;
-import me.ahsansadik.Moderation.Response.ChatGPT;
-import me.ahsansadik.Moderation.Response.OpenAIChat;
+import me.ahsansadik.Moderation.Features.*;
 import me.ahsansadik.Moderation.SlashCommands.*;
+import me.ahsansadik.Moderation.Ticket.Ticket;
+import me.ahsansadik.Moderation.Ticket.TicketClose;
+import me.ahsansadik.Moderation.Ticket.TicketHandler;
+import me.ahsansadik.Moderation.Ticket.TicketLog;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -26,7 +25,7 @@ public class Main {
     private static JDABuilder jda;
 
     public static void main(String[] args) {
-        jda = JDABuilder.createDefault("TOKEn")
+        jda = JDABuilder.createDefault("TOKEN")
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
                 .addEventListeners(new DefaultRoleAssign())
                 .addEventListeners(new WelcomeText())
@@ -42,6 +41,12 @@ public class Main {
                 .addEventListeners(new Kick())
                 .addEventListeners(new BadWordFilter())
                 .addEventListeners(new Announcement())
+                //.addEventListeners(new InviteLogger())
+                .addEventListeners(new Ticket())
+                .addEventListeners(new TicketClose())
+                .addEventListeners(new TicketHandler())
+                .addEventListeners(new me.ahsansadik.Ping())
+                .addEventListeners(new TicketLog())
                 .addEventListeners(new LogChannel());
 
 
@@ -62,6 +67,8 @@ public class Main {
                         .addOptions(new OptionData(OptionType.STRING, "reason", "Reason for ban", false)),
 
                 Commands.slash("banlist", "Shows a list of banned users"),
+
+                Commands.slash("ping", "Ping Command Sadik"),
 
                 Commands.slash("unban", "Unban a user")
                         .addOptions(new OptionData(OptionType.STRING, "username", "Name of the user to unban", true)),
@@ -92,16 +99,25 @@ public class Main {
 
                 Commands.slash("set_log_channel", "Set the log channel for logging any events in the guild"),
 
+                Commands.slash("set_announcement_channel", "Set the Announcement channel for giving announcements"),
+
+                Commands.slash("set_invite_log_channel", "Set the channel for invite logs")
+                        .addOptions(new OptionData(OptionType.CHANNEL, "channel", "Channel to send invite logs", true)),
+
                 Commands.slash("announcement", "Create a server announcement"),
 
-                /* Commands.slash("chatgpt", "Send ChatGPT Prompts")
-                        .addOptions(new OptionData(OptionType.STRING, "prompt", "Send a prompt", true)),
-                */
+                Commands.slash("ticket", "Create a new ticket")
+                        .addOption(OptionType.STRING, "reason", "Reason for opening the ticket", true),
+
+                Commands.slash("ticket_close", "Close a ticket")
+                        .addOption(OptionType.STRING, "reason", "Reason for closing the ticket", true),
+
+                Commands.slash("ticket_handler", "Set the allowed members for handling tickets")
+                        .addOption(OptionType.ROLE, "role", "Role that can handle tickets", true),
 
                 Commands.slash("slow_mode", "Sets slow mode for this channel")
                         .addOptions(new OptionData(OptionType.INTEGER, "duration", "Slow mode duration in seconds (0-21600)", true))
         );
-
         guild.updateCommands().addCommands(commands).queue();
     }
 }
