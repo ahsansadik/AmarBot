@@ -6,6 +6,7 @@ import me.ahsansadik.Moderation.Ticket.Ticket;
 import me.ahsansadik.Moderation.Ticket.TicketClose;
 import me.ahsansadik.Moderation.Ticket.TicketHandler;
 import me.ahsansadik.Moderation.Ticket.TicketLog;
+import me.ahsansadik.Moderation.XP.*;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -18,6 +19,8 @@ import java.util.List;
 
 public class Main {
 
+    public static LevelUpHandler levelUpHandler;
+
     public static JDABuilder getJda() {
         return jda;
     }
@@ -25,7 +28,10 @@ public class Main {
     private static JDABuilder jda;
 
     public static void main(String[] args) {
-        jda = JDABuilder.createDefault("TOKEN")
+
+        levelUpHandler = new LevelUpHandler();
+
+        jda = JDABuilder.createDefault("")
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
                 .addEventListeners(new DefaultRoleAssign())
                 .addEventListeners(new WelcomeText())
@@ -41,12 +47,17 @@ public class Main {
                 .addEventListeners(new Kick())
                 .addEventListeners(new BadWordFilter())
                 .addEventListeners(new Announcement())
-                //.addEventListeners(new InviteLogger())
+                .addEventListeners(new InviteLogger())
                 .addEventListeners(new Ticket())
                 .addEventListeners(new TicketClose())
                 .addEventListeners(new TicketHandler())
                 .addEventListeners(new me.ahsansadik.Ping())
                 .addEventListeners(new TicketLog())
+                .addEventListeners(new XPListener())
+                .addEventListeners(new XPManager())
+                .addEventListeners(new XPCommand())
+                .addEventListeners(levelUpHandler)
+                .addEventListeners(new LeaderboardCommand())
                 .addEventListeners(new LogChannel());
 
 
@@ -57,6 +68,7 @@ public class Main {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
     }
 
     private static void registerCommands(Guild guild) {
@@ -85,6 +97,12 @@ public class Main {
                 Commands.slash("warn", "Warn a user")
                         .addOptions(new OptionData(OptionType.USER, "user", "The user to warn", true))
                         .addOptions(new OptionData(OptionType.STRING, "reason", "Reason for warning", false)),
+
+                Commands.slash("xp", "Generate your graphical XP card"),
+
+                Commands.slash("set_levelup_channel", "Set the current channel as the level-up message destination."),
+
+                Commands.slash("leaderboard", "Shows the top 10 users with highest XP"),
 
                 Commands.slash("warnings", "Display warnings of a user")
                         .addOptions(new OptionData(OptionType.USER, "user", "The user whose warnings you want to see", true)),
